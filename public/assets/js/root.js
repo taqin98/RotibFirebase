@@ -39,6 +39,7 @@ const renderMenu = (response) => {
 const reloadMenu = () => {
 	renderMenu(master_menu)
 	$('#__errMenu').remove()
+	$('#sidebarPanel').modal('hide')
 }
 
 const actionMenu = (response) => {

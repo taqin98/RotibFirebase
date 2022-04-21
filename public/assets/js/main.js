@@ -187,21 +187,13 @@ function download_resouces(cacheName, arrData) {
 
         for (i = 0; i < arrData.length; i++) {
             iProgression++;
-            console.log('p', iProgression,arrData.length-1)
+            console.log('Process download cache', iProgression, 'From', arrData.length-1)
             if (iProgression == arrData.length-1) {
               bProgress = true;
             }
             $('#progress .progress-text').text(percentage(iProgression, arrData.length-1).toFixed(0) + '%');
             $('#progress .progress-bar').css({'width':percentage(iProgression, arrData.length-1)+'%'});
-            // await cache.add(arrData[i]);
-            await fetch(arrData[i])
-            .then(function(res) {
-              return caches.open('doa-v3')
-              .then(function(cache) {
-                cache.put(arrData[i], res.clone());
-                // return res;
-              })
-            })
+            await cache.add(arrData[i]);
 
             if (bProgress) {
               setTimeout(function(){

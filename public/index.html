@@ -200,26 +200,52 @@
         }
         $('.swiper-wrapper').html(data);
       }
-      let res = ''
+      let newArrayCache = [], source_array = []
       async function check_cache(CacheName, arrData){
         await caches.open(CacheName).then(function(cache) {
 
+          switch(CacheName){
+            case 'pembukaan-v3':
+            source_array = pembukaan
+            break;
+
+            case 'images-v3':
+            source_array = images
+            break;
+
+            case 'asmaul-v3':
+            source_array = asmaul_husna
+            break;
+
+            case 'doa-v3':
+            source_array = doa
+            break;
+          }
+          
           cache.keys().then(function(keyList) {
+            newArrayCache = []
+
             console.log('keyList.length', keyList.length)
+            let data = ''
             if(keyList.length > 0){
-              // $('body').append('data di cache')
-              let data = ''
               for(var i = 0; i < keyList.length; i++){
-                if ((i+1) < 10) { 
-                  data += `<div class="swiper-slide dark-mode-image"><img src="${keyList[i].url.substr(0,102) + '0'+(i+1) + '.jpg'}" id="page-image" 
-                  data-id=""
-                  data-page="" alt="" width="100%" height="100%" class="dark-mode-image"></div>`;
-                } else {
-                  data += `<div class="swiper-slide dark-mode-image"><img src="${keyList[i].url.substr(0,102) + (i+1) + '.jpg'}" id="page-image" 
-                  data-id=""
-                  data-page="" alt="" width="100%" height="100%" class="dark-mode-image"></div>`;
+                for (var j = 0; j < source_array.length; j++) {
+                  if(keyList[i].url == source_array[j]){
+                    // console.log(i,'Matches index-',j, source_array[j])
+                    newArrayCache[j] = source_array[j]
+                  } else {
+                    // console.log(i,'UnMatches index-',j, source_array[j])
+                    newArrayCache[j] = source_array[j]
+                  }
                 }
+
+                // console.log(newArrayCache[i])
+                  data += `<div class="swiper-slide dark-mode-image"><img src="${newArrayCache[i]}" id="page-image" 
+                  data-id=""
+                  data-page="" alt="" width="100%" height="100%" class="dark-mode-image"></div>`;
               }
+
+              
               $('.swiper-wrapper').html(data);
               $('body').attr('data-status', 'memuat data dari CacheStorage');
             } else {
@@ -229,8 +255,7 @@
             }
 
             console.log(`Jumlah Data di cache [${CacheName}]`, keyList.length)
-          });
-
+          })
         })
       }
 
