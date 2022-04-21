@@ -2,6 +2,9 @@
 const CACHE_STATIC_NAME = "static-s-V4";
 const CACHE_DYNAMIC_NAME = "dynamic-d-v3";
 const CACHE_IMAGES_NAME = "images-v3";
+const CACHE_ASMAUL = "asmaul-v3",
+      CACHE_DOA = "doa-v3",
+      CACHE_PEMBUKAAN = "pembukaan-v3"
 
 const filesToCache = [
 	'/',
@@ -21,6 +24,18 @@ const myCaches = [{
   },
   {
     name: CACHE_IMAGES_NAME,
+    urls: []
+  },
+  {
+    name: CACHE_ASMAUL,
+    urls: []
+  },
+  {
+    name: CACHE_DOA,
+    urls: []
+  },
+  {
+    name: CACHE_PEMBUKAAN,
     urls: []
   }
  ]
@@ -52,7 +67,12 @@ self.addEventListener("activate", event => {
     return Promise.all(
       keyList.map(key => {
 
-        if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME && key !== CACHE_IMAGES_NAME) {
+        if (key !== CACHE_STATIC_NAME
+        	&& key !== CACHE_DYNAMIC_NAME
+        	&& key !== CACHE_IMAGES_NAME
+        	&& key !== CACHE_PEMBUKAAN
+          && key !== CACHE_ASMAUL
+          && key !== CACHE_DOA) {
           console.log("[ServiceWorker] - Removing old cache", key);
           return caches.delete(key);
         }
@@ -63,6 +83,7 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener('fetch', function(event) {
+  console.log('event', event)
   event.respondWith(
     fetch(event.request)
       .then(function(res) {

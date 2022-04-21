@@ -169,42 +169,50 @@ const darkLight =() => {
 }
 
 var iProgression = -1, bProgress = false;
-function delete_resources() {
+function delete_resources(cacheName) {
   return new Promise(resolve => {
     setTimeout(() => {
-      const del = caches.delete('images-v3')
+      const del = caches.delete(cacheName)
       resolve(del);
     }, 2000);
   });
 }
-function download_resouces() {
+function download_resouces(cacheName, arrData) {
   return new Promise(resolve => {
     setTimeout(() => {
-      caches.open('images-v3').then(function(cache){
+      caches.open(cacheName).then(async function(cache){
 
         $('#progress .progress-text').text('');
         $('#progress .progress-bar').css({'width':0+'%'})
 
-        for (i = 0; i <= images.length-1; i++) {
-          iProgression++;
-          console.log('p', iProgression,images.length-1)
-          if (iProgression == images.length-1) {
-            bProgress = true;
-          }
-          $('#progress .progress-text').text(percentage(iProgression, images.length-1).toFixed(0) + '%');
-          $('#progress .progress-bar').css({'width':percentage(iProgression, images.length-1)+'%'});
-          cache.add(images[i]);
+        for (i = 0; i < arrData.length; i++) {
+            iProgression++;
+            console.log('p', iProgression,arrData.length-1)
+            if (iProgression == arrData.length-1) {
+              bProgress = true;
+            }
+            $('#progress .progress-text').text(percentage(iProgression, arrData.length-1).toFixed(0) + '%');
+            $('#progress .progress-bar').css({'width':percentage(iProgression, arrData.length-1)+'%'});
+            // await cache.add(arrData[i]);
+            await fetch(arrData[i])
+            .then(function(res) {
+              return caches.open('doa-v3')
+              .then(function(cache) {
+                cache.put(arrData[i], res.clone());
+                // return res;
+              })
+            })
 
-          if (bProgress) {
-            setTimeout(function(){
-              location.reload();
-            }, 1500)
-          }
+            if (bProgress) {
+              setTimeout(function(){
+                // location.reload();
+              }, 1500)
+            }
         }
 
 
         var check_progress = setInterval(function(){
-          if(iProgression == images.length-1){
+          if(iProgression == arrData.length-1){
             clearInterval(check_progress)
           }
         })
@@ -218,9 +226,9 @@ function download_resouces() {
   });
 }
 
-async function asyncCall_delete() {
+async function asyncCall_delete(CacheName) {
   console.log('calling');
-  const result = await delete_resources();
+  const result = await delete_resources(CacheName);
   if (result) {
     location.reload()
     console.log('success')
@@ -229,9 +237,9 @@ async function asyncCall_delete() {
   }
 }
 
-async function asyncCall_download() {
+async function asyncCall_download(CacheName, arrData) {
   console.log('calling');
-  const result = await download_resouces();
+  const result = await download_resouces(CacheName, arrData);
   console.log('result', result)
 }
 const percentage = (partialValue, totalValue) => {
@@ -353,179 +361,7 @@ var swiper = new Swiper('.swiper-container', {
   // }
 
 
-  var renderMenu = function(response){
-    console.log('renderMenu', response[i]);
-    var sTitle = '', sMenu = ''
-    for (var i = 0; i < response.length; i++) {
-      sTitle += '<div class="listview-title">'
-      sTitle += '<span>'+ response[i].bab +'</span>'
-      sTitle += '</div>'
-      sTitle += '<ul class="listview flush transparent no-line image-listview">'
-      response[i].menu.forEach((item, index) => {
-        sTitle += '          <li>'
-        sTitle += '              <a href="#" class="item" data-id="'+item.index+'" id="' + response[i].id + '_'+index+'">'
-        sTitle += '                  <div class="icon-box bg-primary">'
-        sTitle += '                      <ion-icon name="home-outline"></ion-icon>'
-        sTitle += '                  </div>'
-        sTitle += '                  <div class="in">'
-        sTitle += item.title
-        sTitle += '                  </div>'
-        sTitle += '              </a>'
-        sTitle += '          </li>'
-      })
-      sTitle += '</ul>'
-
-    }
-    $('.modal-body').append(sTitle)
-
-
-    var _bIsRotibMenu = false, _bIsDoaMenu = false, _bIsSholatMenu = false,
-        _bIsQosidahMenu = false, _bIsMunakatMenu = false, _bIsTambahanMenu = false
-    for (var i = 0; i < response.length; i++) {
-      response[i].menu.forEach((item, index) => {
-
-        $('li a#'+response[i].id+'_'+index).click(function(){
-          slideIndex = $(this).data('id') - 1;
-          // swiper.slideTo(slideIndex)
-          console.log('slideIndex', slideIndex)
-          switch(true){
-            case slideIndex > 0 && slideIndex < 6 : {
-              swiperSlideTo(slideIndex)
-            }
-            break;
-            case slideIndex > 5 && slideIndex < 13 : {
-              if (_bIsRotibMenu !== true) {
-                _bIsRotibMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'rotib',
-                    title : 'Rotibul Haddad'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              swiperSlideTo(slideIndex)
-            }
-            case slideIndex > 40 && slideIndex < 88 : {
-              if (_bIsRotibMenu !== true) {
-                _bIsRotibMenu = true
-
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'rotib',
-                    title : 'Rotibul Haddad'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              if (_bIsDoaMenu !== true) {
-                _bIsDoaMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'doa',
-                    title : 'Wirid & Doa'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              swiperSlideTo(slideIndex)
-            }
-            case slideIndex > 73 && slideIndex < 92 : {
-              if (_bIsRotibMenu !== true) {
-                _bIsRotibMenu = true
-
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'rotib',
-                    title : 'Rotibul Haddad'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              if (_bIsDoaMenu !== true) {
-                _bIsDoaMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'doa',
-                    title : 'Wirid & Doa'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              if (_bIsSholatMenu !== true) {
-                _bIsSholatMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'sholat',
-                    title : 'Bab Sholat'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              swiperSlideTo(slideIndex)
-            }
-
-            case slideIndex > 90 && slideIndex < 100 : {
-              if (_bIsRotibMenu !== true) {
-                _bIsRotibMenu = true
-
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'rotib',
-                    title : 'Rotibul Haddad'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              if (_bIsDoaMenu !== true) {
-                _bIsDoaMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'doa',
-                    title : 'Wirid & Doa'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              if (_bIsSholatMenu !== true) {
-                _bIsSholatMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'sholat',
-                    title : 'Bab Sholat'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              if (_bIsQosidahMenu !== true) {
-                _bIsQosidahMenu = true
-                requestDataToWorker({
-                  type: 'requestData',
-                  data: {
-                    params : 'qasidah',
-                    title : 'Qosidah & Pujian'}
-                  })
-                swiperSlideTo(slideIndex)
-              }
-              swiperSlideTo(slideIndex)
-            }
-          }
-          $('#sidebarPanel').modal('hide')
-        })
-
-      })
-    }
-
-  }
-  var swiperSlideTo = function(slideIndex){
-    $('#loaderContent').show()
-    $('#cardContent').hide()
-    setTimeout(function(){ 
-      swiper.slideTo(slideIndex); 
-      $('#loaderContent').hide(); 
-      $('#cardContent').show() 
-    }, 500)
-  }
+  
   var renderData = function(response, sComment){
     if (!response) return
     updateToastStatus(sComment+' content has been added on the page')

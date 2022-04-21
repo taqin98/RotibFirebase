@@ -79,6 +79,8 @@
     </style>
     <!-- Jquery -->
     <script src="assets/js/lib/jquery-3.4.1.min.js"></script>
+    <script src="assets/js/root.js"></script>
+    <script src="assets/js/data/menu.js"></script>
     <script type="text/javascript">
       $(function(){
         $('#search').load('template/AppSearch.html')
@@ -102,20 +104,30 @@
     <div id="appCapsule">
     	<div class="error-page">
     		<div class="icon-box text-success">
-    			<ion-icon name="checkmark-circle-outline" role="img" class="md hydrated" aria-label="alert circle"></ion-icon>
+    			<ion-icon name="happy-outline" role="img" class="md hydrated" aria-label="alert circle"></ion-icon>
     		</div>
-    		<h1 class="title">Alert Title</h1>
+    		<h1 class="title mb-0">Status Resources</h1>
+    		<span class="mb-2" id="textCacheName"></span>
     		<div class="text mb-5" id="textMessage">
-    			Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    			Kamu sekarang bisa pilih data resource yang bisa kamu unduh
+    			untuk menggunakan fitur mode offline secara maksimal
     		</div>
-
     		<div class="">
+    			<div class="row">
+    				<div class="col-10 mx-auto mb-2">
+    					<select class="form-control col" onchange="selectCacheName(this)">
+    						<option value="-"> pilih data</option>
+    						<option value="images-v3"> Rotibul Haddad</option>
+    						<option value="asmaul-v3"> Asmaul Husna</option>
+    					</select>
+    				</div>
+    			</div>
     			<div class="row">
     				<!-- <div class="col-6">
     					<a href="javascript:;" class="btn btn-secondary btn-lg btn-block">Go Back</a>
     				</div> -->
     				<div class="col-10 mx-auto">
-    					<a href="#" class="btn btn-md btn-primary btn-lg btn-block" id="__btnAction">Try Again</a>
+    					<a href="#" class="btn btn-md btn-primary btn-md btn-block" id="__btnAction">Yuk Coba</a>
     				</div>
     			</div>
     		</div>
@@ -152,17 +164,42 @@
     <!-- SwipperJs -->
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
     <!-- Main Js File -->
-    <script src="images.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/data/images.js"></script>
+    <script src="assets/js/data/images_asmaul.js"></script>
 
     <script type="text/javascript">
-      $(document).ready(function(){
-        check_cache('images-v3')
-      })
+    	const selectCacheName = (ev) => {
+    		switch(ev.value){
+    			case 'images-v3':
+    				$('#textCacheName').text('Rotibul Haddad')
+    				check_cache(ev.value, images)
+    				console.log(ev.value+'')
+    			break;
+    			case 'asmaul-v3':
+    				$('#textCacheName').text('Asmaul Husna')
+    				check_cache(ev.value, asmaul_husna)
+    				console.log(ev.value+'')
+    			break;
+    			default:
+    				$('.error-page').find('h1.title').text('Status Resources')
+            		$('.icon-box').find('ion-icon').attr('name', 'happy-outline')
+    				$('#textCacheName').text('')
+    				$('#textMessage').html('Kamu sekarang bisa pilih data resource yang bisa kamu unduh\
+    					untuk menggunakan fitur mode offline secara maksimal');
+    				$('#__btnAction').hide()
+    			break;
+    		}
+    	}
+    	$(document).ready(function(){
+    		$('#__btnAction').hide()
+    		// $('#textCacheName').text($('#appCapsule').find('select').val())
+    		// check_cache($('#appCapsule').find('select').val())
+    	})
     </script>
     
     <script type="text/javascript">
-      async function check_cache(CacheName){
+      async function check_cache(CacheName, arrData){
         await caches.open(CacheName).then(function(cache) {
 
           cache.keys().then(function(keyList) {
@@ -172,29 +209,31 @@
             	$('.icon-box').find('ion-icon').attr('name', 'checkmark-circle-outline')
             	$('#textMessage').text('Kamu sekarang bisa menggunakan aplikasi tanpa data Internet');
 
-            	$('#__btnAction').text('delete resource');
+            	$('#__btnAction').show()
+            	$('#__btnAction').html('<ion-icon name="trash-outline"></ion-icon> delete resource');
             	$('#__btnAction').addClass('btn-danger').removeClass('btn-primary');
             	$('#__btnAction').click(function(e){
             		e.preventDefault();
-            		$('#__btnAction').text('proses...');
-            		asyncCall_delete()
+            		$('#__btnAction').html('<ion-icon name="refresh-outline"></ion-icon> proses...');
+            		asyncCall_delete(CacheName)
             	})
             } else {
             	$('.error-page').find('h1.title').text('Online Mode')
             	$('.icon-box').find('ion-icon').attr('name', 'alert-circle')
             	$('#textMessage').html('Kamu sekarang menggunakan data internet untuk memuat resource aplikasi<br>Download resources untuk menggunakan aplikasi secara offline');
 
-            	$('#__btnAction').text('download resource');
+            	$('#__btnAction').show()
+            	$('#__btnAction').html('<ion-icon name="download-outline"></ion-icon> download resource');
             	$('#__btnAction').addClass('btn-primary').removeClass('btn-danger');
             	$('#__btnAction').click(function(e){
             		e.preventDefault();
             		$('#progress').css('display', 'block')
-            		$('#__btnAction').text('proses...');
-            		asyncCall_download()
+            		$('#__btnAction').html('<ion-icon name="refresh-outline"></ion-icon> proses...');
+            		asyncCall_download(CacheName, arrData)
             	})
             }
 
-            console.log('Jumlah Data di cache [images-v3]', keyList.length)
+            console.log(`Jumlah Data di cache [${CacheName}]`, keyList.length)
           });
 
         })
